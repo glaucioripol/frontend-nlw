@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
+import { Map, TileLayer, Marker } from "react-leaflet";
 import "./CreatePoint.css";
+
+import { api } from "../../services/api";
 
 import {
   nameApp,
@@ -21,78 +24,106 @@ import {
 } from "../../common/strings";
 import Logo from "../../assets/logo.svg";
 
-export const CreatePoint: React.FC = () => (
-  <div id="page-create-point">
-    <header>
-      <img src={Logo} alt={nameApp} />
-      <Link to="/">
-        <FiArrowLeft />
-        {goBackHome}
-      </Link>
-    </header>
+interface IItemResponse {
+  id: number;
+  image_url: string;
+  title: string;
+}
 
-    <form>
-      <h1 dangerouslySetInnerHTML={{ __html: registerNewPointCollect }} />
+export const CreatePoint: React.FC = () => {
+  const [itemsCollect, setItemsCollect] = useState<IItemResponse[]>([]);
 
-      <fieldset>
-        <legend>
-          <h2>{dataText}</h2>
-        </legend>
+  function retrieveItemsToCollect(): void {
+    api
+      .get("/items")
+      .then(({ data: { data } }) => setItemsCollect(data))
+      .catch((err) => console.error(err));
+  }
 
-        <div className="field">
-          <label htmlFor="name">{entityName}</label>
-          <input id="name" name="name" type="text" />
-        </div>
+  useEffect(retrieveItemsToCollect, []);
+  return (
+    <div id="page-create-point">
+      <header>
+        <img src={Logo} alt={nameApp} />
+        <Link to="/">
+          <FiArrowLeft />
+          {goBackHome}
+        </Link>
+      </header>
 
-        <div className="field-group">
+      <form>
+        <h1 dangerouslySetInnerHTML={{ __html: registerNewPointCollect }} />
+
+        <fieldset>
+          <legend>
+            <h2>{dataText}</h2>
+          </legend>
+
           <div className="field">
-            <label htmlFor="email">{emailString}</label>
-            <input id="email" name="email" type="text" />
+            <label htmlFor="name">{entityName}</label>
+            <input id="name" name="name" type="text" />
           </div>
-          <div className="field">
-            <label htmlFor="whatsapp">{Whatsapp}</label>
-            <input id="whatsapp" name="whatsapp" type="text" />
+
+          <div className="field-group">
+            <div className="field">
+              <label htmlFor="email">{emailString}</label>
+              <input id="email" name="email" type="text" />
+            </div>
+            <div className="field">
+              <label htmlFor="whatsapp">{Whatsapp}</label>
+              <input id="whatsapp" name="whatsapp" type="text" />
+            </div>
           </div>
-        </div>
-      </fieldset>
+        </fieldset>
 
-      <fieldset>
-        <legend>
-          <h2>{addressText}</h2>
-          <span>{selectAdressAfter}</span>
-        </legend>
+        <fieldset>
+          <legend>
+            <h2>{addressText}</h2>
+            <span>{selectAdressAfter}</span>
+          </legend>
 
-        <div className="field-group">
-          <div className="field">
-            <label htmlFor="uf">{unitedFederation}</label>
-            <select name="uf" id="uf">
-              <option value="0">Selecione uma UF</option>
-            </select>
+          <Map center={[-19.9434317, -44.1055362]} zoom={15}>
+            <TileLayer
+              attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <Marker position={[-19.9434317, -44.1055362]} />
+          </Map>
+
+          <div className="field-group">
+            <div className="field">
+              <label htmlFor="uf">{unitedFederation}</label>
+              <select name="uf" id="uf">
+                <option value="0">Selecione uma UF</option>
+              </select>
+            </div>
+            <div className="field">
+              <label htmlFor="city">{cityText}</label>
+              <select name="city" id="city">
+                <option value="0">Selecione uma Cidade</option>
+              </select>
+            </div>
           </div>
-          <div className="field">
-            <label htmlFor="city">{cityText}</label>
-            <select name="city" id="city">
-              <option value="0">Selecione uma Cidade</option>
-            </select>
-          </div>
-        </div>
-      </fieldset>
+        </fieldset>
 
-      <fieldset>
-        <legend>
-          <h2>{itemsCollectText}</h2>
-          <span>{selectOneOrMoreItemsText}</span>
-        </legend>
+        <fieldset>
+          <legend>
+            <h2>{itemsCollectText}</h2>
+            <span>{selectOneOrMoreItemsText}</span>
+          </legend>
 
-        <ul className="items-grid">
-          <li className="selected">
-            <img src="http://localhost:3333/uploads/oleo.svg" alt="Oleo" />
-            <span>Oleo de cozinha</span>
-          </li>
-        </ul>
-      </fieldset>
+          <ul className="items-grid">
+            {itemsCollect?.map(({ id, image_url, title }) => (
+              <li key={id.toString()}>
+                <img src={image_url} alt={title} />
+                <span>{title}</span>
+              </li>
+            ))}
+          </ul>
+        </fieldset>
 
-      <button>{registerNewPointOfColectText}</button>
-    </form>
-  </div>
-);
+        <button>{registerNewPointOfColectText}</button>
+      </form>
+    </div>
+  );
+};
