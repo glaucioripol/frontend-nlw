@@ -1,6 +1,6 @@
 import React from "react";
 import "./App.css";
 
-import { Home } from "./pages/Home";
+import { Routes } from "./routes";
 
-export const App = () => <Home />;
+export const App = () => <Routes />;

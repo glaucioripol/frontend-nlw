@@ -1,8 +1,13 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { FiLogIn } from "react-icons/fi";
 import "./Home.css";
 
-import { describeHome, homeMessage } from "../../common/strings";
+import {
+  describeHome,
+  homeMessage,
+  registerNewPointText,
+} from "../../common/strings";
 import Logo from "../../assets/logo.svg";
 
 export const Home: React.FC = () => {
@@ -17,12 +22,12 @@ export const Home: React.FC = () => {
           <h1> {describeHome}</h1>
           <p>{homeMessage}</p>
 
-          <a href="">
+          <Link to="/create-point">
             <span>
               <FiLogIn />
             </span>
-            <strong>Cadastre um ponto de coleta</strong>
-          </a>
+            <strong>{registerNewPointText}</strong>
+          </Link>
         </main>
       </div>
     </div>
