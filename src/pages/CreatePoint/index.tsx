@@ -26,6 +26,8 @@ import {
 } from "../../common/strings";
 import Logo from "../../assets/logo.svg";
 
+import { Dropzone } from "../../components/Dropzone";
+
 interface IItemResponse {
   id: number;
   image_url: string;
@@ -68,21 +70,27 @@ export const CreatePoint: React.FC = () => {
   });
 
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [selectedFile, setSelectedFile] = useState<File>();
 
   // handles
   function handleSubmit(event: ChangeEvent<HTMLFormElement>) {
     event.preventDefault();
-    api.post("/points", {
-      image: "nudes",
-      name: inputTextForm.name,
-      email: inputTextForm.email,
-      whatsapp: inputTextForm.whatsapp,
-      latitude: selectedPosition[0],
-      longitude: selectedPosition[1],
-      city: selectedCity,
-      uf: selectedUF,
-      items: selectedItems,
-    });
+
+    const formData = new FormData();
+    if (selectedFile) {
+      formData.append("image", selectedFile);
+    }
+
+    formData.append("name", inputTextForm.name);
+    formData.append("email", inputTextForm.email);
+    formData.append("whatsapp", inputTextForm.whatsapp);
+    formData.append("latitude", String(selectedPosition[0]));
+    formData.append("longitude", String(selectedPosition[1]));
+    formData.append("city", selectedCity);
+    formData.append("uf", selectedUF);
+    formData.append("items", selectedItems.join(","));
+
+    api.post("/points", formData);
     push("/");
   }
 
@@ -151,6 +159,8 @@ export const CreatePoint: React.FC = () => {
 
       <form onSubmit={handleSubmit}>
         <h1 dangerouslySetInnerHTML={{ __html: registerNewPointCollect }} />
+
+        <Dropzone onFileUploaded={setSelectedFile} />
 
         <fieldset>
           <legend>
